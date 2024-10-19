@@ -13,6 +13,16 @@ RPCF::RPCF() {
 // Destructor
 RPCF::~RPCF() {}
 
+// Matrix calculation
+void RPCF::GCal() {
+    Eigen::MatrixXd e0 = rot(0, 0);
+    Eigen::MatrixXd e = this->rot.block(1, 0, 3, 1);
+    Eigen::MatrixXd ecross = dynMath::VecCross(e);
+
+    Eigen::MatrixXd G(4, 4);
+    this->G << -e, - ecross + e0 * Eigen::MatrixXd::Identity(3, 3);
+}
+
 // Member function to set matrix values
 void RPCF::setMatrix(const Eigen::MatrixXd& mat) {
     this->matrix = mat;
@@ -24,6 +34,11 @@ void RPCF::setPos(const Eigen::MatrixXd& pos) {
 
 void RPCF::setRot(const Eigen::MatrixXd& rot) {
     this->rot = rot;
+}
+
+void RPCF::setdRot(const Eigen::MatrixXd& drot)
+{
+    this->drot = drot;
 }
 
 void RPCF::setMass(const double& mass) {
@@ -45,4 +60,21 @@ Eigen::MatrixXd RPCF::getPos() const {
 
 Eigen::MatrixXd RPCF::getRot() const {
     return rot;
+}
+
+Eigen::MatrixXd RPCF::getdRot() const
+{
+    return drot;
+}
+
+double RPCF::getMass() const {
+    return mass;
+}
+
+Eigen::MatrixXd RPCF::getInertia() const {
+    return inertia;
+}
+
+Eigen::MatrixXd RPCF::getG() const {
+    return G;
 }

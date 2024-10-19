@@ -2,6 +2,7 @@
 #define RPCF_H
 
 #include "eigen-3.4.0/Eigen/Dense"
+#include "dynMath.h"
 
 class RPCF
 {
@@ -12,12 +13,24 @@ public:
     // Destructor
     ~RPCF();
 
+    //
+    void Update();
+
+    // Matrix calculation
+    void GCal();
+
     // Member function to set matrix values
     void setMatrix(const Eigen::MatrixXd &mat);
 
     void setPos(const Eigen::MatrixXd &pos);
 
+    void setVel(const Eigen::MatrixXd &vel);
+
     void setRot(const Eigen::MatrixXd &rot);
+
+    void setAngVel(const Eigen::MatrixXd &angVel);
+
+    void setdRot(const Eigen::MatrixXd &drot);
 
     void setMass(const double &mass);
 
@@ -28,7 +41,19 @@ public:
 
     Eigen::MatrixXd getPos() const;
 
+    Eigen::MatrixXd getVel() const;
+
     Eigen::MatrixXd getRot() const;
+
+    Eigen::MatrixXd getAngVel() const;
+
+    Eigen::MatrixXd getdRot() const;
+
+    double getMass() const;
+
+    Eigen::MatrixXd getInertia() const;
+
+    Eigen::MatrixXd getG() const;
 
     // Update related matrixs
     void update();
@@ -61,6 +86,9 @@ private:
     Eigen::MatrixXd angVel;
     Eigen::MatrixXd drot;
     Eigen::MatrixXd inertia;
+
+    Eigen::MatrixXd G;
+
     double mass;
     int id;
 };
