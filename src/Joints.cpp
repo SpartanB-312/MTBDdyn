@@ -98,7 +98,7 @@ Eigen::MatrixXd Joints::PhiPqCal() {
     for (const auto& rpcf : rpcfObjects) {
         Eigen::MatrixXd p = rpcf.getRot();
         Eigen::MatrixXd result(1, 7);
-        result << 0, 0, 0, 0, 0, 0, 2 * p.transpose();
+        result << 0, 0, 0, 2 * p.transpose();
 
         int currentRows = PhiPq.rows();
         int currentCols = PhiPq.cols();
