@@ -10,7 +10,7 @@ Joints::Joints() {
 Joints::~Joints() {}
 
 void Joints::PhiCal() {
-    switch (type) {
+    switch (this->type) {
     case 1:
         break;
     case 2:
@@ -28,7 +28,7 @@ void Joints::PhiCal() {
 }
 
 void Joints::PhiqCal() {
-    switch (type) {
+    switch (this->type) {
     case 1:
         break;
     case 2:
@@ -46,7 +46,7 @@ void Joints::PhiqCal() {
 }
 
 void Joints::dPhiCal() {
-    switch (type) {
+    switch (this->type) {
     case 1:
         break;
     case 2:
@@ -63,8 +63,8 @@ void Joints::dPhiCal() {
     }
 }
 
-Eigen::MatrixXd Joints::gammaCal() {
-    switch (type) {
+void Joints::gammaCal() {
+    switch (this->type) {
     case 1:
         break;
     case 2:
@@ -79,11 +79,10 @@ Eigen::MatrixXd Joints::gammaCal() {
         this->gamma = gammaPCal();
         break;
     }
-    return this->gamma;
 }
 
 Eigen::MatrixXd Joints::PhiPCal() {
-    Eigen::MatrixXd PhiP(0, 0);
+    Eigen::MatrixXd PhiP(0, 1);
     for (const auto& rpcf : rpcfObjects) {
         Eigen::MatrixXd p = rpcf.getRot();
         Eigen::MatrixXd result = p.transpose() * p - Eigen::MatrixXd::Identity(1, 1);
@@ -98,13 +97,13 @@ Eigen::MatrixXd Joints::PhiPqCal() {
     Eigen::MatrixXd PhiPq(0, 0);
     for (const auto& rpcf : rpcfObjects) {
         Eigen::MatrixXd p = rpcf.getRot();
-        Eigen::MatrixXd result(1, 4);
-        result << 0, 0, 0, 2 * p.transpose();
+        Eigen::MatrixXd result(1, 7);
+        result << 0, 0, 0, 0, 0, 0, 2 * p.transpose();
 
         int currentRows = PhiPq.rows();
         int currentCols = PhiPq.cols();
-        PhiPq.conservativeResize(currentRows + 1, currentCols + 4);
-        PhiPq.block(currentRows, currentCols, 1, 4) = result;
+        PhiPq.conservativeResize(currentRows + 1, currentCols + 7);
+        PhiPq.block(currentRows, currentCols, 1, 7) = result;
     }
     return PhiPq;
 }
@@ -116,13 +115,13 @@ Eigen::MatrixXd Joints::dPhiPCal()
 
 Eigen::MatrixXd Joints::gammaPCal()
 {
-    Eigen::MatrixXd gammaP(0, 0);
+    Eigen::MatrixXd gammaP(0, 1);
     for (const auto& rpcf : rpcfObjects) {
         Eigen::MatrixXd dp = rpcf.getdRot();
         Eigen::MatrixXd result = 2 * dp.transpose() * dp;
-        int currentRows = PhiPq.rows();
+        int currentRows = gammaP.rows();
         gammaP.conservativeResize(currentRows + 1, Eigen::NoChange);
-        PhiPq.block(currentRows, 0, 1, 1) = result;
+        gammaP.block(currentRows, 0, 1, 1) = result;
     }
     return gammaP;
 }

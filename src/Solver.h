@@ -8,8 +8,10 @@
 
 #include "RPCF.h"
 #include "Joints.h"
+#include "Force.h"
 
-class Solver {
+class Solver
+{
 public:
     Solver();
     ~Solver();
@@ -29,27 +31,29 @@ public:
     void gammaCal();
 
     // set
-    void setRPCFObjects(const std::vector<RPCF>& objects);
-    void setJointsObjs(const std::vector<Joints>& objects);
+    void setRPCFObjects(std::vector<RPCF> &objects);
+    void setJointsObjs(std::vector<Joints> &objects);
 
-    void setTotalTime(const double& TotalTime);
-    void setTimeStep(const double& TimeStep);
+    void setTotalTime(double &TotalTime);
+    void setTimeStep(double &TimeStep);
     void setnStep();
 
     // get
     std::vector<RPCF> getRPCFObjects() const;
     std::vector<Joints> getJointsObjs() const;
+
 private:
-    std::vector<RPCF> rpcfObjects; // Array of RPCF objects
+    std::vector<RPCF> rpcfObjects;  // Array of RPCF objects
     std::vector<Joints> jointsObjs; // Array of Joints objects
+    // std::vector<Force> forcesObjs; // Array of Forces objects
 
     double Time; // Total time
-    double h; // Time step
+    double h;    // Time step
 
     int nStep; // Number of steps
 
-    Eigen::MatrixXd M; // Mass matrix
-    Eigen::MatrixXd Q; // Force matrix
+    Eigen::MatrixXd M;  // Mass matrix
+    Eigen::MatrixXd Q;  // Force matrix
     Eigen::MatrixXd Qe; // External force matrix
     Eigen::MatrixXd Qv;
 

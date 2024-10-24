@@ -7,7 +7,8 @@
 #include "RPCF.h"
 #include "Marker.h"
 
-class Joints {
+class Joints
+{
 public:
     Joints();
     ~Joints();
@@ -23,8 +24,8 @@ public:
     Eigen::MatrixXd gammaPCal();
 
     // set
-    void setMkObjs(const std::vector<Marker>& objects);
-    void setRPCFObjects(const std::vector<RPCF>& objects);
+    void setMkObjs(const std::vector<Marker> &objects);
+    void setRPCFObjects(const std::vector<RPCF> &objects);
 
     void setType(int type);
 
@@ -37,6 +38,7 @@ public:
     std::vector<Eigen::MatrixXd> getPhiq() const;
     Eigen::MatrixXd getdPhi() const;
     Eigen::MatrixXd getgamma() const;
+
 private:
     Eigen::MatrixXd Phi;
     std::vector<Eigen::MatrixXd> Phiq;

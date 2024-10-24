@@ -1,6 +1,7 @@
 #ifndef RPCF_H
 #define RPCF_H
 
+#include <iostream>
 #include "eigen-3.4.0/Eigen/Dense"
 #include "dynMath.h"
 
@@ -14,7 +15,7 @@ public:
     ~RPCF();
 
     //
-    void Update();
+    void update();
 
     // Matrix calculation
     void GCal();
@@ -36,6 +37,9 @@ public:
 
     void setInertia(const Eigen::MatrixXd &inertia);
 
+    void qsetPos(const Eigen::MatrixXd &q);
+    void qsetVel(const Eigen::MatrixXd &dq);
+
     // Member function to get matrix
     Eigen::MatrixXd getMatrix() const;
 
@@ -55,8 +59,9 @@ public:
 
     Eigen::MatrixXd getG() const;
 
-    // Update related matrixs
-    void update();
+    Eigen::MatrixXd qgetPos() const;
+    Eigen::MatrixXd qgetVel() const;
+
     // // Struct to hold matrix data
     // struct MatrixData {
     //     Eigen::MatrixXd matrix;
