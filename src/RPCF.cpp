@@ -19,6 +19,7 @@ void RPCF::update()
 {
     // Inner update
     this->GCal();
+    this->dGCal();
 }
 
 // Matrix calculation
@@ -34,6 +35,23 @@ void RPCF::GCal() {
     result << -e, temp;
     // std::cout << result << std::endl;
     this->G = result;
+}
+
+void RPCF::dGCal()
+{
+    double de0 = this->drot.coeff(0, 0);
+    Eigen::MatrixXd de = this->drot.block(1, 0, 3, 1);
+    Eigen::MatrixXd decross = dynMath::VecCross(de);
+    Eigen::MatrixXd result(3, 4);
+    Eigen::MatrixXd temp;
+    temp = - decross + de0 * Eigen::MatrixXd::Identity(3, 3);
+    result << -de, temp;
+    this->dG = result;
+}
+
+void RPCF::setId(const int &id)
+{
+    this->id = id;
 }
 
 // Member function to set matrix values
@@ -114,6 +132,11 @@ Eigen::MatrixXd RPCF::getG() const {
     return G;
 }
 
+Eigen::MatrixXd RPCF::getdG() const
+{
+    return this->dG;
+}
+
 Eigen::MatrixXd RPCF::qgetPos() const
 {
     Eigen::MatrixXd q(7, 1);
@@ -128,4 +151,9 @@ Eigen::MatrixXd RPCF::qgetVel() const
     dq.block(0, 0, 3, 1) = this->vel;
     dq.block(3, 0, 4, 1) = this->drot;
     return dq;
+}
+
+int RPCF::getId() const
+{
+    return id;
 }

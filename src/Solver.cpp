@@ -55,14 +55,13 @@ void Solver::EEuler()
         Eigen::MatrixXd LHS(this->M.rows() + this->Phiq.rows(), this->M.cols() + this->Phiq.rows());
         LHS << this->M, this->Phiq.transpose(),
             this->Phiq, Eigen::MatrixXd::Zero(this->Phiq.rows(), this->Phiq.rows());
-
+        std::cout << "LHS: " << LHS.rows() << "x" << LHS.cols() << std::endl;
         // RHS
         Eigen::MatrixXd RHS(this->Q.rows() + this->Phiq.rows(), 1);
         RHS << this->Q,
             this->gamma;
 
         // 输出 LHS 和 RHS 的维度以进行调试
-        std::cout << "LHS: " << LHS.rows() << "x" << LHS.cols() << std::endl;
         std::cout << "RHS: " << RHS.rows() << "x" << RHS.cols() << std::endl;
 
         std::cout << LHS << std::endl;
@@ -140,8 +139,15 @@ void Solver::MassCal()
 
 void Solver::ForceCal()
 {
-    int numObjects = rpcfObjects.size();
-    Eigen::MatrixXd Q = Eigen::MatrixXd::Zero(7 * numObjects, 1);
+    // int numObjects = rpcfObjects.size();
+    // Eigen::MatrixXd Q = Eigen::MatrixXd::Zero(7 * numObjects, 1);
+    // this->Q = Q;
+
+    QeCal();
+    std::cout << "00" << std::endl;
+    QvCal();
+    std::cout << "000" << std::endl;
+    Eigen::MatrixXd Q = this->Qe + this->Qv;
     this->Q = Q;
 }
 
@@ -173,7 +179,7 @@ void Solver::PhiqCal()
             // std::cout << Phiqs.size() << std::endl;
             Eigen::MatrixXd result = Phiqs[bi];
             // std::cout << Phiqs[bi] << std::endl;
-            phiq.block(0, 0 , result.rows(), result.cols()) = result;
+            phiq.block(0, 0 , result.rows(), result.cols()) = result; // 多刚体多约束时需要修改
             // std::cout << "2.5" << std::endl;
         }
         // std::cout << "3" << std::endl;
@@ -196,6 +202,37 @@ void Solver::gammaCal()
     this->gamma = gamma;
 }
 
+void Solver::QeCal()
+{
+    Eigen::MatrixXd Qe(rpcfObjects.size()*7, 1);
+    for (auto &force : forcesObjs)
+    {
+        std::vector<Eigen::MatrixXd> Fe = force.getF();
+        std::vector<Eigen::MatrixXd> np = force.getnp();
+        std::vector<int> rpcfids = force.getRPCFid();
+        for (size_t i = 0; i < rpcfids.size(); ++i)
+        {
+            Eigen::MatrixXd G = rpcfObjects[rpcfids[i]].getG();
+            Qe.block(rpcfids[i]*7, 0, Fe[i].rows(), Fe[i].cols()) = Fe[i];
+            Qe.block(rpcfids[i]*7+3, 0, 4, 1) = 2*G.transpose()*np[i];
+        }
+    }
+    this->Qe = Qe;
+}
+
+void Solver::QvCal()
+{
+    Eigen::MatrixXd Qv(rpcfObjects.size()*7, 1);
+    for (size_t bi = 0; bi < rpcfObjects.size(); ++bi)
+    {
+        Eigen::MatrixXd dG = rpcfObjects[bi].getdG();
+        std::cout << dG << std::endl;
+        Qv.block(bi*7+3, 0, 4, 1) = 8*dG.transpose()*rpcfObjects[bi].getInertia()*dG;
+        std::cout << "000" << std::endl;
+    }
+    this->Qv = Qv;
+}
+
 // set
 void Solver::setRPCFObjects(std::vector<RPCF> &objects)
 {
@@ -205,6 +242,11 @@ void Solver::setRPCFObjects(std::vector<RPCF> &objects)
 void Solver::setJointsObjs(std::vector<Joints> &objects)
 {
     this->jointsObjs = objects;
+}
+
+void Solver::setForcesObjs(std::vector<Force> &objects)
+{
+    this->forcesObjs = objects;
 }
 
 void Solver::setTotalTime(double &TotalTime)

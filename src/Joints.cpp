@@ -40,7 +40,7 @@ void Joints::PhiqCal() {
     case 5:
         break;
     case 0:
-        this->Phiq.push_back(PhiPqCal());
+        this->Phiq={PhiPqCal()};
         break;
     }
 }

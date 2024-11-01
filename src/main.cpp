@@ -4,6 +4,7 @@
 #include "eigen-3.4.0/Eigen/Dense"
 
 #include "RPCF.h"
+#include "Force.h"
 #include "Solver.h"
 
 int main()
@@ -28,14 +29,22 @@ int main()
     Eigen::MatrixXd drot1(4, 1);
     drot1 << 0, 0, 0, 0;
     body1.setdRot(drot1);
+
+    body1.setId(0);
     // Create a vector of RPCF objects
     std::vector<RPCF> rpcfObjects = {body1};
 
+    Force force1;
+    force1.setRPCFObjects(rpcfObjects);
+    force1.setType(0);
+    force1.setGravityZ();
     // Create a Solver object
     Solver solver1;
-
+    std::cout << "0" << std::endl;
     // Set RPCF objects in Solver
     solver1.setRPCFObjects(rpcfObjects);
+    std::vector<Force> forces = {force1};
+    solver1.setForcesObjs(forces);
 
     // Call a function in Solver that uses RPCF objects
     solver1.EEulerBaumgarte();

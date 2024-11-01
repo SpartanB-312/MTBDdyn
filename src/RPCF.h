@@ -19,8 +19,11 @@ public:
 
     // Matrix calculation
     void GCal();
+    void dGCal();
 
+    void setId(const int &id);
     // Member function to set matrix values
+
     void setMatrix(const Eigen::MatrixXd &mat);
 
     void setPos(const Eigen::MatrixXd &pos);
@@ -58,9 +61,12 @@ public:
     Eigen::MatrixXd getInertia() const;
 
     Eigen::MatrixXd getG() const;
+    Eigen::MatrixXd getdG() const;
 
     Eigen::MatrixXd qgetPos() const;
     Eigen::MatrixXd qgetVel() const;
+
+    int getId() const;
 
     // // Struct to hold matrix data
     // struct MatrixData {
@@ -93,6 +99,7 @@ private:
     Eigen::MatrixXd inertia;
 
     Eigen::MatrixXd G;
+    Eigen::MatrixXd dG;
 
     double mass;
     int id;

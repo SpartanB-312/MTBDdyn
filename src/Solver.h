@@ -30,9 +30,13 @@ public:
     void PhiqCal();
     void gammaCal();
 
+    void QeCal();
+    void QvCal();
+
     // set
     void setRPCFObjects(std::vector<RPCF> &objects);
     void setJointsObjs(std::vector<Joints> &objects);
+    void setForcesObjs(std::vector<Force> &objects);
 
     void setTotalTime(double &TotalTime);
     void setTimeStep(double &TimeStep);
@@ -45,7 +49,7 @@ public:
 private:
     std::vector<RPCF> rpcfObjects;  // Array of RPCF objects
     std::vector<Joints> jointsObjs; // Array of Joints objects
-    // std::vector<Force> forcesObjs; // Array of Forces objects
+    std::vector<Force> forcesObjs; // Array of Forces objects
 
     double Time; // Total time
     double h;    // Time step
