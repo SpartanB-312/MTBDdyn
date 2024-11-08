@@ -3,7 +3,7 @@
 // Constructor
 Solver::Solver()
 {
-    this->Time = 1.0;
+    this->Time = 1000.0;
     this->h = 0.1;
 }
 
@@ -63,11 +63,9 @@ void Solver::EEuler()
 
         // 输出 LHS 和 RHS 的维度以进行调试
         std::cout << "RHS: " << RHS.rows() << "x" << RHS.cols() << std::endl;
-
+        std::cout << Qe << std::endl;
         std::cout << LHS << std::endl;
-
-        // std::cout << "RHS Matrix:\n"
-        //             << RHS << std::endl;
+        std::cout << RHS << std::endl;
         // Solve
         Eigen::VectorXd solution = LHS.colPivHouseholderQr().solve(RHS);
         std::cout << "Solution: " << solution << std::endl;
@@ -143,10 +141,8 @@ void Solver::ForceCal()
     // Eigen::MatrixXd Q = Eigen::MatrixXd::Zero(7 * numObjects, 1);
     // this->Q = Q;
 
-    QeCal();
-    std::cout << "00" << std::endl;
-    QvCal();
-    std::cout << "000" << std::endl;
+    this->QeCal();
+    this->QvCal();
     Eigen::MatrixXd Q = this->Qe + this->Qv;
     this->Q = Q;
 }
@@ -162,6 +158,7 @@ void Solver::PhiCal()
         Phi.conservativeResize(currentRows + result.rows(), Eigen::NoChange);
         Phi.block(currentRows, 0, result.rows(), result.cols()) = result;
     }
+    this->Phi = Phi;
 }
 
 void Solver::PhiqCal()
@@ -222,14 +219,14 @@ void Solver::QeCal()
 
 void Solver::QvCal()
 {
-    Eigen::MatrixXd Qv(rpcfObjects.size()*7, 1);
+    Eigen::MatrixXd Qv = Eigen::MatrixXd::Zero(rpcfObjects.size()*7, 1);
     for (size_t bi = 0; bi < rpcfObjects.size(); ++bi)
     {
         Eigen::MatrixXd dG = rpcfObjects[bi].getdG();
-        std::cout << dG << std::endl;
         Qv.block(bi*7+3, 0, 4, 1) = 8*dG.transpose()*rpcfObjects[bi].getInertia()*dG;
-        std::cout << "000" << std::endl;
     }
+    std::cout << "Qv: " << std::endl;
+    std::cout << Qv << std::endl;
     this->Qv = Qv;
 }
 
