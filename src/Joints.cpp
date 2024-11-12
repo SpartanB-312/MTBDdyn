@@ -11,15 +11,21 @@ Joints::~Joints() {}
 
 void Joints::PhiCal() {
     switch (this->type) {
-    case 1:
+    case 1: // distance
         break;
-    case 2:
+    case 2: // spherical
         break;
-    case 3:
+    case 3: // dot 1
         break;
-    case 4:
+    case 4: // dot 2
         break;
-    case 5:
+    case 5: // cylindrical
+        break;
+    case 6: // revolute
+        break;
+    case 7: // translational
+        break;
+    case 8: // universal
         break;
     case 0:
         this->Phi = PhiPCal();
@@ -83,7 +89,7 @@ void Joints::gammaCal() {
 
 Eigen::MatrixXd Joints::PhiPCal() {
     Eigen::MatrixXd PhiP(0, 1);
-    for (const auto& rpcf : rpcfObjects) {
+    for (const auto& rpcf : rpcfObjects) { // 内部约束仍然由RPCF计算，而不是CM
         Eigen::MatrixXd p = rpcf.getRot();
         Eigen::MatrixXd result = p.transpose() * p - Eigen::MatrixXd::Identity(1, 1);
         int currentRows = PhiP.rows();
@@ -131,15 +137,45 @@ void Joints::setMkObjs(const std::vector<Marker>& objects) {
 }
 
 void Joints::setRPCFObjects(const std::vector<RPCF>& objects) {
-    rpcfObjects = objects;
+    this->rpcfObjects = objects;
 }
 
 void Joints::setType(int JointType) {
     this->type = JointType;
+    switch (this->type) {
+    case 1: // distance
+        break;
+    case 2: // spherical
+        break;
+    case 3: // dot 1
+        break;
+    case 4: // dot 2
+        break;
+    case 5: // cylindrical
+        break;
+    case 6: // revolute
+        break;
+    case 7: // translational
+        break;
+    case 8: // universal
+        break;
+    case 0:
+        this->nhj = this->rpcfObjects.size();
+        this->Phi = PhiPCal();
+        break;
+    }
 }
 
 std::vector<Marker> Joints::getMkObjs() {
     return this->MkObjs;
+}
+
+std::vector<int> Joints::getRPCFid() {
+    std::vector<int> rpcfIds;
+    for (const auto& rpcf : rpcfObjects) {
+        rpcfIds.push_back(rpcf.getId());
+    }
+    return rpcfIds;
 }
 
 Eigen::MatrixXd Joints::getBodyData() {
@@ -160,4 +196,8 @@ Eigen::MatrixXd Joints::getdPhi() const {
 
 Eigen::MatrixXd Joints::getgamma() const {
     return this->gamma;
+}
+
+int Joints::getnhj() const {
+    return this->nhj;
 }

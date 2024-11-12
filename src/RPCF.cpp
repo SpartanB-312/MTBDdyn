@@ -1,5 +1,4 @@
 #include "RPCF.h"
-#include "dynMath.h"
 
 // Constructor
 RPCF::RPCF() {

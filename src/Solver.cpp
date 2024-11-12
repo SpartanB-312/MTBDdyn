@@ -14,24 +14,10 @@ void Solver::preInitialize()
 {
     //
     this->setnStep();
-
     //
-    std::vector<Joints> InnerJoints;
-    for (auto &rpcf : rpcfObjects)
+    for (auto &sys : MTBDObjs)
     {
-        Joints Inner;
-        Inner.setRPCFObjects(rpcfObjects);
-        Inner.setType(0);
-
-        InnerJoints.push_back(Inner);
-    }
-    for (auto &innerJoint : InnerJoints) {
-        this->jointsObjs.push_back(innerJoint);
-    }
-
-    for (auto &rpcf : rpcfObjects)
-    {
-        rpcf.update();
+        sys.update();
     }
 }
 
@@ -103,147 +89,10 @@ void Solver::EEulerBaumgarte()
     }
 }
 
-// Matrix calculation
-void Solver::MassCal()
-{
-    Eigen::MatrixXd Mass;
-    for (const auto &rpcf : rpcfObjects)
-    {
-        double mass = rpcf.getMass();
-        Eigen::MatrixXd inertia = rpcf.getInertia();
-        Eigen::MatrixXd G = rpcf.getG();
-
-        // 构建 m*I3
-        Eigen::Matrix3d I3 = Eigen::Matrix3d::Identity();
-        Eigen::Matrix3d mI3 = mass * I3;
-
-        // 构建 4*G'*J*G
-        Eigen::MatrixXd J = Eigen::MatrixXd::Identity(3, 3);
-        Eigen::MatrixXd GtJG = 4 * G.transpose() * J * G;
-
-        // 构建 M 矩阵
-        Eigen::MatrixXd result(7, 7);
-        result << mI3, Eigen::MatrixXd::Zero(3, 4),
-            Eigen::MatrixXd::Zero(4, 3), GtJG;
-
-        // 将 M 矩阵添加到 Mass 矩阵中
-        int currentRows = Mass.rows();
-        int currentCols = Mass.cols();
-        Mass.conservativeResize(currentRows + 7, currentCols + 7);
-        Mass.block(currentRows, currentCols, 7, 7) = result;
-    }
-    this->M = Mass;
-}
-
-void Solver::ForceCal()
-{
-    // int numObjects = rpcfObjects.size();
-    // Eigen::MatrixXd Q = Eigen::MatrixXd::Zero(7 * numObjects, 1);
-    // this->Q = Q;
-
-    this->QeCal();
-    this->QvCal();
-    Eigen::MatrixXd Q = this->Qe + this->Qv;
-    this->Q = Q;
-}
-
-void Solver::PhiCal()
-{
-    Eigen::MatrixXd Phi;
-    for (auto &joints : jointsObjs)
-    {
-        joints.PhiCal();
-        Eigen::MatrixXd result = joints.getPhi();
-        int currentRows = Phi.rows();
-        Phi.conservativeResize(currentRows + result.rows(), Eigen::NoChange);
-        Phi.block(currentRows, 0, result.rows(), result.cols()) = result;
-    }
-    this->Phi = Phi;
-}
-
-void Solver::PhiqCal()
-{
-    int nb = rpcfObjects.size();
-    Eigen::MatrixXd phiq;
-    for (auto &joints : jointsObjs)
-    {
-        joints.PhiqCal();
-        std::vector<Eigen::MatrixXd> Phiqs = joints.getPhiq();
-        int currentRows = phiq.rows();
-        phiq.conservativeResize(1, 7);
-        for (int bi = 0; bi < Phiqs.size(); ++bi)
-        {
-            // std::cout << Phiqs.size() << std::endl;
-            Eigen::MatrixXd result = Phiqs[bi];
-            // std::cout << Phiqs[bi] << std::endl;
-            phiq.block(0, 0 , result.rows(), result.cols()) = result; // 多刚体多约束时需要修改
-            // std::cout << "2.5" << std::endl;
-        }
-        // std::cout << "3" << std::endl;
-    }
-    // std::cout << "4" << std::endl;
-    this->Phiq = phiq;
-}
-
-void Solver::gammaCal()
-{
-    Eigen::MatrixXd gamma;
-    for (auto &joints : jointsObjs)
-    {
-        joints.gammaCal();
-        Eigen::MatrixXd result = joints.getgamma();
-        int currentRows = gamma.rows();
-        gamma.conservativeResize(currentRows + result.rows(), 1);
-        gamma.block(currentRows, 0, result.rows(), result.cols()) = result;
-    }
-    this->gamma = gamma;
-}
-
-void Solver::QeCal()
-{
-    Eigen::MatrixXd Qe(rpcfObjects.size()*7, 1);
-    for (auto &force : forcesObjs)
-    {
-        std::vector<Eigen::MatrixXd> Fe = force.getF();
-        std::vector<Eigen::MatrixXd> np = force.getnp();
-        std::vector<int> rpcfids = force.getRPCFid();
-        for (size_t i = 0; i < rpcfids.size(); ++i)
-        {
-            Eigen::MatrixXd G = rpcfObjects[rpcfids[i]].getG();
-            Qe.block(rpcfids[i]*7, 0, Fe[i].rows(), Fe[i].cols()) = Fe[i];
-            Qe.block(rpcfids[i]*7+3, 0, 4, 1) = 2*G.transpose()*np[i];
-        }
-    }
-    this->Qe = Qe;
-}
-
-void Solver::QvCal()
-{
-    Eigen::MatrixXd Qv = Eigen::MatrixXd::Zero(rpcfObjects.size()*7, 1);
-    for (size_t bi = 0; bi < rpcfObjects.size(); ++bi)
-    {
-        Eigen::MatrixXd dG = rpcfObjects[bi].getdG();
-        Qv.block(bi*7+3, 0, 4, 1) = 8*dG.transpose()*rpcfObjects[bi].getInertia()*dG;
-    }
-    std::cout << "Qv: " << std::endl;
-    std::cout << Qv << std::endl;
-    this->Qv = Qv;
-}
-
 // set
-void Solver::setRPCFObjects(std::vector<RPCF> &objects)
+void Solver::setMTBDsysObjects(std::vector<MTBDsys> &objects)
 {
-    this->rpcfObjects = objects;
-}
-
-void Solver::setJointsObjs(std::vector<Joints> &objects)
-{
-    this->jointsObjs = objects;
-}
-
-void Solver::setForcesObjs(std::vector<Force> &objects)
-{
-    this->forcesObjs = objects;
+    this->MTBDObjs = objects;
 }
 
 void Solver::setTotalTime(double &TotalTime)
@@ -259,15 +108,4 @@ void Solver::setTimeStep(double &TimeStep)
 void Solver::setnStep()
 {
     this->nStep = static_cast<int>(std::ceil(this->Time / this->h));
-}
-
-// get
-std::vector<RPCF> Solver::getRPCFObjects() const
-{
-    return this->rpcfObjects;
-}
-
-std::vector<Joints> Solver::getJointsObjs() const
-{
-    return this->jointsObjs;
 }

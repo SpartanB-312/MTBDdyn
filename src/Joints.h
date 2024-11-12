@@ -18,10 +18,27 @@ public:
     void dPhiCal();
     void gammaCal();
 
-    Eigen::MatrixXd PhiPCal(); // 暂时用物体的，以后换成CM
+    Eigen::MatrixXd PhiPCal();
     Eigen::MatrixXd PhiPqCal();
     Eigen::MatrixXd dPhiPCal();
     Eigen::MatrixXd gammaPCal();
+
+    // Phi
+    Eigen::MatrixXd PhiDistCal();
+    Eigen::MatrixXd PhiD1Cal();
+    Eigen::MatrixXd PhiD2Cal();
+
+    // Phiq
+    Eigen::MatrixXd PhiDistqCal();
+
+
+    // dPhi
+    Eigen::MatrixXd dPhiDistCal();
+
+
+    // gammaP
+    Eigen::MatrixXd gammaDistCal();
+
 
     // set
     void setMkObjs(const std::vector<Marker> &objects);
@@ -31,6 +48,7 @@ public:
 
     // get
     std::vector<Marker> getMkObjs();
+    std::vector<int> getRPCFid();
 
     Eigen::MatrixXd getBodyData();
 
@@ -39,6 +57,7 @@ public:
     Eigen::MatrixXd getdPhi() const;
     Eigen::MatrixXd getgamma() const;
 
+    int getnhj() const;
 private:
     Eigen::MatrixXd Phi;
     std::vector<Eigen::MatrixXd> Phiq;
@@ -47,6 +66,7 @@ private:
     std::vector<Marker> MkObjs;
     std::vector<RPCF> rpcfObjects;
     int type;
+    int nhj;
 };
 
 #endif // Joints_H

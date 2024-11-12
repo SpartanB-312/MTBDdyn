@@ -9,6 +9,10 @@ namespace dynMath
     Eigen::VectorXd matrixToVector(const Eigen::MatrixXd &matrix);
 
     Eigen::MatrixXd VecCross(const Eigen::MatrixXd &vec);
+
+    Eigen::MatrixXd p2A(const Eigen::MatrixXd &p);
+    Eigen::MatrixXd GCal(const Eigen::MatrixXd &p);
+    Eigen::MatrixXd ECal(const Eigen::MatrixXd &p);
 }
 
 #endif // DYNMATH_H
