@@ -44,8 +44,11 @@ public:
 
     Eigen::MatrixXd qgetPos() const;
     Eigen::MatrixXd qgetVel() const;
+
+    std::vector<int> getsize() const;
     // update
     void update(Eigen::VectorXd q, Eigen::VectorXd dq);
+    void update();
 private:
     std::vector<RPCF> rpcfObjs;
     std::vector<Joints> jointsObjs;

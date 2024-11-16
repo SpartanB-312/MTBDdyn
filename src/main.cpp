@@ -5,6 +5,7 @@
 
 #include "RPCF.h"
 #include "Force.h"
+#include "MTBDsys.h"
 #include "Solver.h"
 
 int main()
@@ -38,13 +39,17 @@ int main()
     force1.setRPCFObjects(rpcfObjects);
     force1.setType(0);
     force1.setGravityZ();
+    std::vector<Force> forces = {force1};
+
+    MTBDsys sys1;
+    sys1.setRPCFObjects(rpcfObjects);
+    sys1.setForcesObjs(forces);
+    std::vector<MTBDsys> syss = {sys1};
+
     // Create a Solver object
     Solver solver1;
-    std::cout << "0" << std::endl;
     // Set RPCF objects in Solver
-    solver1.setRPCFObjects(rpcfObjects);
-    std::vector<Force> forces = {force1};
-    solver1.setForcesObjs(forces);
+    solver1.setMTBDsysObjects(syss);
 
     // Call a function in Solver that uses RPCF objects
     solver1.EEulerBaumgarte();

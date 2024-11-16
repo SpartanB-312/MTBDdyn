@@ -16,7 +16,7 @@ void MTBDsys::preInitialize()
     this->jointsObjs.push_back(Inner);
     this->nb = rpcfObjs.size();
     this->nc = 7 * nb;
-    int nhj = 0;
+    int nhj = nb;
     for(auto &Joints : jointsObjs)
     {
         nhj += Joints.getnhj();
@@ -70,7 +70,7 @@ void MTBDsys::ForceCal()
 
 void MTBDsys::PhiCal()
 {
-    Eigen::MatrixXd Phi;
+    Eigen::MatrixXd Phi = Eigen::MatrixXd::Zero(0, 1);
     for (auto &joints : jointsObjs)
     {
         joints.PhiCal();
@@ -211,6 +211,15 @@ Eigen::MatrixXd MTBDsys::qgetVel() const
     return dq;
 }
 
+std::vector<int> MTBDsys::getsize() const
+{
+    std::vector<int> size;
+    size.push_back(this->nb);
+    size.push_back(this->nc);
+    size.push_back(this->nh);
+    return size;
+}
+
 void MTBDsys::update(Eigen::VectorXd q, Eigen::VectorXd dq)
 {
     for (int bi = 0; bi < this->nb; ++bi)
@@ -219,4 +228,28 @@ void MTBDsys::update(Eigen::VectorXd q, Eigen::VectorXd dq)
         rpcfObjs[bi].qsetVel(dq.block(7*bi, 0, 7, 1));
         rpcfObjs[bi].update();
     }
+    this->MassCal();
+    this->ForceCal();
+    this->PhiCal();
+    this->PhiqCal();
+    this->gammaCal();
+    this->QeCal();
+    this->QvCal();
+}
+
+void MTBDsys::update()
+{
+    for (int bi = 0; bi < this->nb; ++bi)
+    {
+        rpcfObjs[bi].update();
+    }
+    this->MassCal();
+    this->ForceCal();
+    this->PhiCal();
+    std::cout << "0" << std::endl;
+    this->PhiqCal();
+    this->gammaCal();
+    std::cout << "0" << std::endl;
+    this->QeCal();
+    this->QvCal();
 }
