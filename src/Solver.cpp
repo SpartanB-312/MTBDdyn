@@ -39,6 +39,7 @@ void Solver::EEuler()
         Eigen::MatrixXd Q = MTBDObjs[0].getQ();
         Eigen::MatrixXd gamma = MTBDObjs[0].getgamma();
         // LHS
+        std::cout << "Phiq: " << Phiq<< std::endl;
         Eigen::MatrixXd LHS(M.rows() + Phiq.rows(), M.cols() + Phiq.rows());
         LHS.block(0, 0, M.rows(), M.cols()) = M;
         LHS.block(0, M.cols(), Phiq.cols(), Phiq.rows()) = Phiq.transpose();

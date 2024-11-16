@@ -91,7 +91,7 @@ void MTBDsys::PhiqCal()
         std::vector<Eigen::MatrixXd> Phiqs = joints.getPhiq();
         std::vector<int> rpcfids = joints.getRPCFid();
         int currentRows = Phiq.rows();
-        Phiq.conservativeResize(currentRows + 7, 7);
+        Phiq.conservativeResize(currentRows + joints.getnhj(), 7);
         for (int bi = 0; bi < Phiqs.size(); ++bi)
         {
             Eigen::MatrixXd result = Phiqs[bi];
@@ -246,10 +246,8 @@ void MTBDsys::update()
     this->MassCal();
     this->ForceCal();
     this->PhiCal();
-    std::cout << "0" << std::endl;
     this->PhiqCal();
     this->gammaCal();
-    std::cout << "0" << std::endl;
     this->QeCal();
     this->QvCal();
 }
