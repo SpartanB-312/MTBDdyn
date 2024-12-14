@@ -12,6 +12,7 @@ Joints::~Joints() {}
 void Joints::PhiCal() {
     switch (this->type) {
     case 1: // distance
+        this->Phi = PhiDistCal();
         break;
     case 2: // spherical
         break;
@@ -36,6 +37,7 @@ void Joints::PhiCal() {
 void Joints::PhiqCal() {
     switch (this->type) {
     case 1:
+        this->Phiq = PhiDistqCal();
         break;
     case 2:
         break;
@@ -54,6 +56,7 @@ void Joints::PhiqCal() {
 void Joints::dPhiCal() {
     switch (this->type) {
     case 1:
+        this->dPhi = dPhiDistCal();
         break;
     case 2:
         break;
@@ -72,6 +75,7 @@ void Joints::dPhiCal() {
 void Joints::gammaCal() {
     switch (this->type) {
     case 1:
+        this->gamma = gammaDistCal();
         break;
     case 2:
         break;
@@ -132,6 +136,67 @@ Eigen::MatrixXd Joints::gammaPCal()
     return gammaP;
 }
 
+// Phi
+Eigen::MatrixXd Joints::PhiDistCal()
+{
+    Eigen::MatrixXd Ai = MkObjs[0].getMkA(); // 以后把计算写在update中
+    Eigen::MatrixXd Aj = MkObjs[1].getMkA();
+    Eigen::MatrixXd ri = MkObjs[0].getMkR();
+    Eigen::MatrixXd rj = MkObjs[1].getMkR();
+    Eigen::MatrixXd si = MkObjs[0].getMkpos();
+    Eigen::MatrixXd sj = MkObjs[1].getMkpos();
+
+    Eigen::MatrixXd dij = rj + Aj * sj - ri - Ai * si;
+    return (dij.transpose() * dij - Eigen::MatrixXd::Identity(1, 1) * dist * dist) / 2;
+}
+
+std::vector<Eigen::MatrixXd> Joints::PhiDistqCal()
+{
+    Eigen::MatrixXd Ai = MkObjs[0].getMkA(); // 以后把计算写在update中
+    Eigen::MatrixXd Aj = MkObjs[1].getMkA();
+    Eigen::MatrixXd ri = MkObjs[0].getMkR();
+    Eigen::MatrixXd rj = MkObjs[1].getMkR();
+    Eigen::MatrixXd si = MkObjs[0].getMkpos();
+    Eigen::MatrixXd sj = MkObjs[1].getMkpos();
+    Eigen::MatrixXd qi = MkObjs[0].getMkq();
+    Eigen::MatrixXd qj = MkObjs[1].getMkq();
+
+    Eigen::MatrixXd dij = rj + Aj * sj - ri - Ai * si;
+    Eigen::MatrixXd I3 = Eigen::MatrixXd::Identity(3, 3);
+    Eigen::MatrixXd epdBi = dynMath::epdBCal(qi, si);
+    Eigen::MatrixXd epdBj = dynMath::epdBCal(qj, sj);
+    Eigen::MatrixXd Phiqi;
+    Eigen::MatrixXd Phiqj;
+    Phiqi.conservativeResize(1, 7);
+    Phiqi << -dij.transpose() * I3, -dij.transpose() * epdBi;
+    Phiqj.conservativeResize(1, 7);
+    Phiqj << dij.transpose() * I3, dij.transpose() * epdBj;
+
+    return {Phiqi, Phiqj};
+}
+
+Eigen::MatrixXd Joints::gammaDistCal()
+{
+    Eigen::MatrixXd qi = MkObjs[0].getMkq();
+    Eigen::MatrixXd qj = MkObjs[1].getMkq();
+    Eigen::MatrixXd dqi = MkObjs[0].getMkdq();
+    Eigen::MatrixXd dqj = MkObjs[1].getMkdq();
+    Eigen::MatrixXd si = MkObjs[0].getMkpos();
+    Eigen::MatrixXd sj = MkObjs[1].getMkpos();
+
+    Eigen::MatrixXd chii = dqi;
+    Eigen::MatrixXd chij = dqj;
+    Eigen::MatrixXd dqij(14, 1);
+    dqij << dqi,
+            dqj;
+
+    Eigen::MatrixXd P2 = dynMath::P2DistCal(qi, qj, chii, chij, si, sj, dist);
+    Eigen::MatrixXd gamma = P2 * dqij;
+
+    return gamma;
+}
+
+// set
 void Joints::setMkObjs(const std::vector<Marker>& objects) {
     this->MkObjs = objects;
 }
@@ -144,6 +209,7 @@ void Joints::setType(int JointType) {
     this->type = JointType;
     switch (this->type) {
     case 1: // distance
+        this->nhj = 1;
         break;
     case 2: // spherical
         break;
@@ -164,6 +230,12 @@ void Joints::setType(int JointType) {
         this->Phi = PhiPCal();
         break;
     }
+}
+
+void Joints::setDist(int dist)
+{
+    this->dist = dist;
+    setType(1);
 }
 
 std::vector<Marker> Joints::getMkObjs() {

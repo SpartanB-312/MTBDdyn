@@ -12,11 +12,13 @@ public:
     ~Marker();
 
     // set
+    void setGround();
+
     void setMkpos(const Eigen::MatrixXd &pos);
     void setMkAuvw(const Eigen::MatrixXd &Auvw);
     void setMkAuvw(const Eigen::MatrixXd &Au, const Eigen::MatrixXd &Av, const Eigen::MatrixXd &Aw);
     void setMkAp(const Eigen::MatrixXd &p);
-    void setid(const int &id);
+    void setId(const int &id);
 
     void setBody(const RPCF &body);
     // get
@@ -25,6 +27,12 @@ public:
     Eigen::MatrixXd getMku() const;
     Eigen::MatrixXd getMkv() const;
     Eigen::MatrixXd getMkw() const;
+
+    Eigen::MatrixXd getMkA() const; // 名字或许可以改成body
+    Eigen::MatrixXd getMkR() const;
+    Eigen::MatrixXd getMkRot() const;
+    Eigen::MatrixXd getMkq() const;
+    Eigen::MatrixXd getMkdq() const;
     int getid() const;
 
     // update
@@ -34,8 +42,12 @@ private:
     Eigen::MatrixXd MkAu; // u,v,w
     Eigen::MatrixXd MkAv; // u,v,w
     Eigen::MatrixXd MkAw; // u,v,w
+
+    Eigen::MatrixXd MkA;
     RPCF Body;
     int id;
+
+    bool isGroundSet;
 };
 
 #endif // MARKER_H

@@ -18,7 +18,7 @@ file(GLOB MAIN_SOURCES src/core/main.cpp ${CORE_SOURCES})
 add_executable(MTBDdyn ${MAIN_SOURCES})
 
 # 添加 demo1 源文件
-# file(GLOB DEMO1_SOURCES src/demos/demo1.cpp ${CORE_SOURCES})
+file(GLOB DEMO1_SOURCES src/demos/Pendulum.cpp ${CORE_SOURCES})
 
 # 添加 demo1 可执行文件
-# add_executable(demo1 ${DEMO1_SOURCES})
+add_executable(demo1 ${DEMO1_SOURCES})

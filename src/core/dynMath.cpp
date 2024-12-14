@@ -59,4 +59,51 @@ namespace dynMath
         result << -e, temp;
         return result;
     }
+
+    Eigen::MatrixXd epdBCal(const Eigen::MatrixXd &q, const Eigen::MatrixXd &a)
+    {
+        Eigen::MatrixXd I3 = Eigen::MatrixXd::Identity(3, 3);
+        double e0 = q(3, 0);
+        Eigen::MatrixXd e = q.block(4, 0, 3, 1);
+        Eigen::MatrixXd ecross = VecCross(e);
+        Eigen::MatrixXd across = VecCross(a);
+        Eigen::MatrixXd E(3, 4);
+        E << -e, ecross + e0 * I3;
+        Eigen::MatrixXd T(4, 4);
+        T << 0, -a.transpose(),
+            a, -across;
+        Eigen::MatrixXd result = 2 * E * T;
+        return result;
+    }
+
+    Eigen::MatrixXd P2DistCal(const Eigen::MatrixXd &qi, const Eigen::MatrixXd &qj, const Eigen::MatrixXd &chii, const Eigen::MatrixXd &chij,
+                              const Eigen::MatrixXd &si, const Eigen::MatrixXd &sj, const double d)
+    {
+        Eigen::MatrixXd pi = qi.block(3, 0, 3, 1);
+        Eigen::MatrixXd pj = qj.block(3, 0, 3, 1);
+        Eigen::MatrixXd ri = qi.block(0, 0, 3, 1);
+        Eigen::MatrixXd rj = qj.block(0, 0, 3, 1);
+
+        Eigen::MatrixXd Ai = p2A(qi);
+        Eigen::MatrixXd Aj = p2A(qj);
+        Eigen::MatrixXd Bi = epdBCal(qi, si);
+        Eigen::MatrixXd Bj = epdBCal(qj, sj);
+        Eigen::MatrixXd Bci = epdBCal(chii, si);
+        Eigen::MatrixXd Bcj = epdBCal(chij, sj);
+        Eigen::MatrixXd chiri = chii.block(0, 0, 3, 1);
+        Eigen::MatrixXd chirj = chij.block(0, 0, 3, 1);
+        Eigen::MatrixXd chipi = chii.block(3, 0, 4, 1);
+        Eigen::MatrixXd chipj = chij.block(3, 0, 4, 1);
+
+        Eigen::MatrixXd dij = rj + Aj * sj - ri - Ai * si;
+        Eigen::MatrixXd bi = chiri + Bi * chipi;
+        Eigen::MatrixXd bj = chirj + Bj * chipj;
+        Eigen::MatrixXd P2i(1, 8);
+        P2i << (bi - bj).transpose(), (bi - bj).transpose() * Bi - dij.transpose() * Bci;
+        Eigen::MatrixXd P2j(1, 8);
+        P2j << (bj - bi).transpose(), (bj - bi).transpose() * Bj + dij.transpose() * Bcj;
+        Eigen::MatrixXd P2(1, 14);
+        P2 << P2i, P2j;
+        return P2;
+    }
 }

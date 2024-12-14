@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "eigen-3.4.0/Eigen/Dense"
+#include "dynMath.h"
 
 #include "RPCF.h"
 #include "Marker.h"
@@ -29,7 +30,7 @@ public:
     Eigen::MatrixXd PhiD2Cal();
 
     // Phiq
-    Eigen::MatrixXd PhiDistqCal();
+    std::vector<Eigen::MatrixXd> PhiDistqCal();
 
 
     // dPhi
@@ -45,6 +46,7 @@ public:
     void setRPCFObjects(const std::vector<RPCF> &objects);
 
     void setType(int type);
+    void setDist(int dist);
 
     // get
     std::vector<Marker> getMkObjs();
@@ -67,6 +69,8 @@ private:
     std::vector<RPCF> rpcfObjects;
     int type;
     int nhj;
+
+    double dist;
 };
 
 #endif // Joints_H

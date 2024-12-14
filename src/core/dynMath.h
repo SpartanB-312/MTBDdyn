@@ -13,6 +13,9 @@ namespace dynMath
     Eigen::MatrixXd p2A(const Eigen::MatrixXd &p);
     Eigen::MatrixXd GCal(const Eigen::MatrixXd &p);
     Eigen::MatrixXd ECal(const Eigen::MatrixXd &p);
+    Eigen::MatrixXd epdBCal(const Eigen::MatrixXd &q, const Eigen::MatrixXd &a);
+    Eigen::MatrixXd P2DistCal(const Eigen::MatrixXd &qi, const Eigen::MatrixXd &qj, const Eigen::MatrixXd &chii, const Eigen::MatrixXd &chij,
+                              const Eigen::MatrixXd &si, const Eigen::MatrixXd &sj, const double d);
 }
 
 #endif // DYNMATH_H

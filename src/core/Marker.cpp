@@ -1,19 +1,24 @@
 #include "Marker.h"
 
-// 构造函数
 Marker::Marker()
 {
-    // 初始化成员变量
     Mkpos = Eigen::MatrixXd::Zero(3, 1);
     MkAu = Eigen::MatrixXd::Zero(3, 1);
     MkAv = Eigen::MatrixXd::Zero(3, 1);
     MkAw = Eigen::MatrixXd::Zero(3, 1);
 }
 
-// 析构函数
 Marker::~Marker()
 {
-    // 这里可以添加析构逻辑，如果有需要的话
+}
+
+void Marker::setGround()
+{
+    this->Mkpos = Eigen::MatrixXd::Zero(3, 1);
+    Eigen::MatrixXd Auvw = Eigen::MatrixXd::Identity(3, 3);
+    setMkAuvw(Auvw);
+
+    this->isGroundSet = true;
 }
 
 void Marker::setMkpos(const Eigen::MatrixXd &pos)
@@ -41,7 +46,7 @@ void Marker::setMkAp(const Eigen::MatrixXd &p)
     this->Mkpos = p;
 }
 
-void Marker::setid(const int &id)
+void Marker::setId(const int &id)
 {
     this->id = id;
 }
@@ -78,6 +83,53 @@ Eigen::MatrixXd Marker::getMkv() const
 Eigen::MatrixXd Marker::getMkw() const
 {
     return this->MkAw;
+}
+
+Eigen::MatrixXd Marker::getMkA() const
+{
+    if (isGroundSet) {
+        return Eigen::MatrixXd::Identity(3, 3);
+    } else {
+        return dynMath::p2A(this->Body.getRot());
+    }
+}
+
+Eigen::MatrixXd Marker::getMkR() const
+{
+    if (isGroundSet) {
+        return Eigen::MatrixXd::Zero(3, 1);
+    } else {
+        return this->Body.getPos();
+    }
+}
+
+Eigen::MatrixXd Marker::getMkRot() const
+{
+    if (isGroundSet) {
+        return Eigen::MatrixXd::Zero(4, 1);
+    } else {
+        return this->Body.getRot();
+    }
+}
+
+Eigen::MatrixXd Marker::getMkq() const
+{
+    if (isGroundSet) {
+        Eigen::MatrixXd q = Eigen::MatrixXd::Zero(7, 1);
+        q(3, 0) = 1.0;
+        return q;
+    } else {
+        return this->Body.qgetPos();
+    }
+}
+
+Eigen::MatrixXd Marker::getMkdq() const
+{
+    if (isGroundSet) {
+        return Eigen::MatrixXd::Zero(7, 1);
+    } else {
+        return this->Body.qgetVel();
+    }
 }
 
 int Marker::getid() const
