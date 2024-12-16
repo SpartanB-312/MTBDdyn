@@ -12,7 +12,7 @@ include_directories(${CMAKE_SOURCE_DIR}/lib)
 file(GLOB CORE_SOURCES src/core/*.cpp)
 
 # 添加主程序源文件
-file(GLOB MAIN_SOURCES src/core/main.cpp ${CORE_SOURCES})
+file(GLOB MAIN_SOURCES src/demos/main.cpp ${CORE_SOURCES})
 
 # 添加主程序可执行文件
 add_executable(MTBDdyn ${MAIN_SOURCES})

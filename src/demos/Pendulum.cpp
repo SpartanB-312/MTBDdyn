@@ -26,7 +26,7 @@ int main()
     Eigen::MatrixXd drot1(4, 1);
     drot1 << 0, 0, 0, 0;
     Pendulum1.setdRot(drot1);
-    Pendulum1.setId(0);
+    Pendulum1.setId(1);
     std::vector<RPCF> rpcfObjects = {Pendulum1};
 
     Marker Ground;

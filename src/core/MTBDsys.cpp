@@ -13,15 +13,17 @@ void MTBDsys::preInitialize()
     Joints Inner;
     Inner.setRPCFObjects(rpcfObjs);
     Inner.setType(0);
-    this->jointsObjs.push_back(Inner);
+    this->InnerPObjs.push_back(Inner);
     this->nb = rpcfObjs.size();
     this->nc = 7 * nb;
-    int nhj = nb;
+    int nhOj = 0;
     for(auto &Joints : jointsObjs)
     {
-        nhj += Joints.getnhj();
+        nhOj += Joints.getnhj();
     }
-    this->nh = nhj;
+    this->nhI = nb;
+    this->nhO = nhOj;
+    this->nh = nhO + nhI;
     //
     for (auto &rpcf : rpcfObjs)
     {
@@ -88,16 +90,36 @@ void MTBDsys::PhiqCal()
     for (auto &joints : jointsObjs)
     {
         joints.PhiqCal();
+        std::cout << "3" << std::endl;
         std::vector<Eigen::MatrixXd> Phiqs = joints.getPhiq();
         std::vector<int> rpcfids = joints.getRPCFid();
+        std::cout << Phiqs.size() << std::endl;
         int currentRows = Phiq.rows();
         Phiq.conservativeResize(currentRows + joints.getnhj(), 7);
         for (int bi = 0; bi < Phiqs.size(); ++bi)
         {
             Eigen::MatrixXd result = Phiqs[bi];
+            std::cout << result << std::endl;
             Phiq.block(currentRows, rpcfids[bi] * 7, result.rows(), result.cols()) = result;
         }
     }
+
+    for (auto &inner : InnerPObjs)
+    {
+        inner.PhiqCal();
+        std::vector<Eigen::MatrixXd> Phiqs = inner.getPhiq();
+        std::vector<int> rpcfids = inner.getRPCFid();
+        std::cout << Phiqs.size() << std::endl;
+        int currentRows = Phiq.rows();
+        Phiq.conservativeResize(currentRows + inner.getnhj(), 7);
+        for (int bi = 0; bi < Phiqs.size(); ++bi)
+        {
+            Eigen::MatrixXd result = Phiqs[bi];
+            std::cout << result << std::endl;
+            Phiq.block(currentRows, rpcfids[bi] * 7, result.rows(), result.cols()) = result;
+        }
+    }
+    
     this->Phiq = Phiq;
 }
 
@@ -108,6 +130,15 @@ void MTBDsys::gammaCal()
     {
         joints.gammaCal();
         Eigen::MatrixXd result = joints.getgamma();
+        int currentRows = gamma.rows();
+        gamma.conservativeResize(currentRows + result.rows(), 1);
+        gamma.block(currentRows, 0, result.rows(), result.cols()) = result;
+    }
+
+    for (auto &inner : InnerPObjs)
+    {
+        inner.gammaCal();
+        Eigen::MatrixXd result = inner.getgamma();
         int currentRows = gamma.rows();
         gamma.conservativeResize(currentRows + result.rows(), 1);
         gamma.block(currentRows, 0, result.rows(), result.cols()) = result;
@@ -247,7 +278,9 @@ void MTBDsys::update()
     this->ForceCal();
     this->PhiCal();
     this->PhiqCal();
+    std::cout << "2" << std::endl;
     this->gammaCal();
+    std::cout << "1" << std::endl;
     this->QeCal();
     this->QvCal();
 }

@@ -1,6 +1,7 @@
 #ifndef _MTBDSYS_H
 #define _MTBDSYS_H
 
+#include <iostream>
 #include <vector>
 #include "eigen-3.4.0/Eigen/Dense"
 
@@ -52,6 +53,7 @@ public:
 private:
     std::vector<RPCF> rpcfObjs;
     std::vector<Joints> jointsObjs;
+    std::vector<Joints> InnerPObjs;
     std::vector<Force> forcesObjs;
 
     Eigen::MatrixXd M;
@@ -67,6 +69,8 @@ private:
 
     int nb;
     int nc;
+    int nhI;
+    int nhO;
     int nh;
 };
 #endif // _MTBDSYS_H

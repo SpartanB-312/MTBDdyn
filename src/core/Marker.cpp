@@ -19,6 +19,7 @@ void Marker::setGround()
     setMkAuvw(Auvw);
 
     this->isGroundSet = true;
+    this->BodyId = 0;
 }
 
 void Marker::setMkpos(const Eigen::MatrixXd &pos)
@@ -54,6 +55,7 @@ void Marker::setId(const int &id)
 void Marker::setBody(const RPCF &body)
 {
     this->Body = body;
+    this->BodyId = body.getId();
 }
 
 Eigen::MatrixXd Marker::getMkpos() const
@@ -135,6 +137,11 @@ Eigen::MatrixXd Marker::getMkdq() const
 int Marker::getid() const
 {
     return this->id;
+}
+
+int Marker::getBodyId() const
+{
+    return this->BodyId;
 }
 
 void Marker::update()

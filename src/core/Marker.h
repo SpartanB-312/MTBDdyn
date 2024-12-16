@@ -34,6 +34,7 @@ public:
     Eigen::MatrixXd getMkq() const;
     Eigen::MatrixXd getMkdq() const;
     int getid() const;
+    int getBodyId() const;
 
     // update
     void update();
@@ -46,6 +47,7 @@ private:
     Eigen::MatrixXd MkA;
     RPCF Body;
     int id;
+    int BodyId;
 
     bool isGroundSet;
 };

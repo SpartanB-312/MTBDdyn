@@ -175,6 +175,11 @@ std::vector<Eigen::MatrixXd> Joints::PhiDistqCal()
     return {Phiqi, Phiqj};
 }
 
+Eigen::MatrixXd Joints::dPhiDistCal()
+{
+    return Eigen::MatrixXd();
+}
+
 Eigen::MatrixXd Joints::gammaDistCal()
 {
     Eigen::MatrixXd qi = MkObjs[0].getMkq();
