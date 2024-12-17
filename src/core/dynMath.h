@@ -1,6 +1,7 @@
 #ifndef DYNMATH_H
 #define DYNMATH_H
 
+#include <iostream>
 #include "eigen-3.4.0/Eigen/Dense"
 
 namespace dynMath

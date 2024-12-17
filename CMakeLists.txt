@@ -11,14 +11,14 @@ include_directories(${CMAKE_SOURCE_DIR}/lib)
 # 添加库函数源文件
 file(GLOB CORE_SOURCES src/core/*.cpp)
 
-# 添加主程序源文件
-file(GLOB MAIN_SOURCES src/demos/main.cpp ${CORE_SOURCES})
+# 添加demo/SingleBody源文件
+file(GLOB DEMO_SINGLEBODY_SOURCES src/demos/SingleBody.cpp ${CORE_SOURCES})
 
-# 添加主程序可执行文件
-add_executable(MTBDdyn ${MAIN_SOURCES})
+# 添加 demo/SingleBody 可执行文件
+add_executable(Demo_SingleBody ${DEMO_SINGLEBODY_SOURCES})
 
-# 添加 demo1 源文件
-file(GLOB DEMO1_SOURCES src/demos/Pendulum.cpp ${CORE_SOURCES})
+# 添加 demo/Pendulum 源文件
+file(GLOB DEMO_PENDULUM_SOURCES src/demos/Pendulum.cpp ${CORE_SOURCES})
 
-# 添加 demo1 可执行文件
-add_executable(demo1 ${DEMO1_SOURCES})
+# 添加 demo/Pendulum 可执行文件
+add_executable(Demo_Pendulum ${DEMO_PENDULUM_SOURCES})

@@ -31,7 +31,7 @@ int main()
     drot1 << 0, 0, 0, 0;
     body1.setdRot(drot1);
 
-    body1.setId(0);
+    body1.setId(1);
     // Create a vector of RPCF objects
     std::vector<RPCF> rpcfObjects = {body1};
 

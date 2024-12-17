@@ -69,6 +69,8 @@ private:
     std::vector<RPCF> rpcfObjects;
     int type;
     int nhj;
+    std::vector<int> MkIds;
+    std::vector<int> BodyIds;
 
     double dist;
 };

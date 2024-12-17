@@ -6,6 +6,7 @@ Marker::Marker()
     MkAu = Eigen::MatrixXd::Zero(3, 1);
     MkAv = Eigen::MatrixXd::Zero(3, 1);
     MkAw = Eigen::MatrixXd::Zero(3, 1);
+    this->isGroundSet = false;
 }
 
 Marker::~Marker()

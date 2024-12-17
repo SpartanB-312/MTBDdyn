@@ -188,13 +188,11 @@ Eigen::MatrixXd Joints::gammaDistCal()
     Eigen::MatrixXd dqj = MkObjs[1].getMkdq();
     Eigen::MatrixXd si = MkObjs[0].getMkpos();
     Eigen::MatrixXd sj = MkObjs[1].getMkpos();
-
     Eigen::MatrixXd chii = dqi;
     Eigen::MatrixXd chij = dqj;
     Eigen::MatrixXd dqij(14, 1);
     dqij << dqi,
             dqj;
-
     Eigen::MatrixXd P2 = dynMath::P2DistCal(qi, qj, chii, chij, si, sj, dist);
     Eigen::MatrixXd gamma = P2 * dqij;
 
@@ -204,10 +202,23 @@ Eigen::MatrixXd Joints::gammaDistCal()
 // set
 void Joints::setMkObjs(const std::vector<Marker>& objects) {
     this->MkObjs = objects;
+    std::vector<int> mkIds;
+    std::vector<int> rpcfIds;
+    for (const auto& mk : MkObjs) {
+        rpcfIds.push_back(mk.getBodyId());
+        mkIds.push_back(mk.getid());
+    }
+    this->BodyIds = rpcfIds;
+    this->MkIds = mkIds;
 }
 
 void Joints::setRPCFObjects(const std::vector<RPCF>& objects) {
     this->rpcfObjects = objects;
+    std::vector<int> rpcfIds;
+    for (const auto& rpcf : rpcfObjects) {
+        rpcfIds.push_back(rpcf.getId());
+    }
+    this->BodyIds = rpcfIds;
 }
 
 void Joints::setType(int JointType) {
@@ -248,11 +259,7 @@ std::vector<Marker> Joints::getMkObjs() {
 }
 
 std::vector<int> Joints::getRPCFid() {
-    std::vector<int> rpcfIds;
-    for (const auto& rpcf : rpcfObjects) {
-        rpcfIds.push_back(rpcf.getId());
-    }
-    return rpcfIds;
+    return this->BodyIds;
 }
 
 Eigen::MatrixXd Joints::getBodyData() {

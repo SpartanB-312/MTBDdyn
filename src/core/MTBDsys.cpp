@@ -87,21 +87,23 @@ void MTBDsys::PhiCal()
 void MTBDsys::PhiqCal()
 {
     Eigen::MatrixXd Phiq;
+    Phiq = Eigen::MatrixXd::Zero(nh, nb * 7);
+    int Jindex = 0;
     for (auto &joints : jointsObjs)
     {
         joints.PhiqCal();
-        std::cout << "3" << std::endl;
         std::vector<Eigen::MatrixXd> Phiqs = joints.getPhiq();
         std::vector<int> rpcfids = joints.getRPCFid();
-        std::cout << Phiqs.size() << std::endl;
-        int currentRows = Phiq.rows();
-        Phiq.conservativeResize(currentRows + joints.getnhj(), 7);
         for (int bi = 0; bi < Phiqs.size(); ++bi)
         {
+            if (rpcfids[bi] == 0) {
+                continue;
+            }
+
             Eigen::MatrixXd result = Phiqs[bi];
-            std::cout << result << std::endl;
-            Phiq.block(currentRows, rpcfids[bi] * 7, result.rows(), result.cols()) = result;
+            Phiq.block(Jindex, rpcfids[bi] * 7 - 7, result.rows(), result.cols()) = result;
         }
+        Jindex += joints.getnhj();
     }
 
     for (auto &inner : InnerPObjs)
@@ -109,39 +111,38 @@ void MTBDsys::PhiqCal()
         inner.PhiqCal();
         std::vector<Eigen::MatrixXd> Phiqs = inner.getPhiq();
         std::vector<int> rpcfids = inner.getRPCFid();
-        std::cout << Phiqs.size() << std::endl;
-        int currentRows = Phiq.rows();
-        Phiq.conservativeResize(currentRows + inner.getnhj(), 7);
         for (int bi = 0; bi < Phiqs.size(); ++bi)
         {
+            if (rpcfids[bi] == 0) {
+                continue;
+            }
             Eigen::MatrixXd result = Phiqs[bi];
-            std::cout << result << std::endl;
-            Phiq.block(currentRows, rpcfids[bi] * 7, result.rows(), result.cols()) = result;
+            Phiq.block(Jindex, rpcfids[bi] * 7 - 7, result.rows(), result.cols()) = result;
         }
+        Jindex += inner.getnhj();
     }
-    
     this->Phiq = Phiq;
 }
 
 void MTBDsys::gammaCal()
 {
     Eigen::MatrixXd gamma;
+    gamma = Eigen::MatrixXd::Zero(nh, 1);
+    int Jindex = 0;
     for (auto &joints : jointsObjs)
     {
         joints.gammaCal();
         Eigen::MatrixXd result = joints.getgamma();
-        int currentRows = gamma.rows();
-        gamma.conservativeResize(currentRows + result.rows(), 1);
-        gamma.block(currentRows, 0, result.rows(), result.cols()) = result;
+        gamma.block(Jindex, 0, result.rows(), result.cols()) = result;
+        Jindex += joints.getnhj();
     }
 
     for (auto &inner : InnerPObjs)
     {
         inner.gammaCal();
         Eigen::MatrixXd result = inner.getgamma();
-        int currentRows = gamma.rows();
-        gamma.conservativeResize(currentRows + result.rows(), 1);
-        gamma.block(currentRows, 0, result.rows(), result.cols()) = result;
+        gamma.block(Jindex, 0, result.rows(), result.cols()) = result;
+        Jindex += inner.getnhj();
     }
     this->gamma = gamma;
 }
@@ -154,11 +155,14 @@ void MTBDsys::QeCal()
         std::vector<Eigen::MatrixXd> Fe = force.getF();
         std::vector<Eigen::MatrixXd> np = force.getnp();
         std::vector<int> rpcfids = force.getRPCFid();
-        for (size_t i = 0; i < rpcfids.size(); ++i)
+        for (size_t bi = 0; bi < rpcfids.size(); ++bi)
         {
-            Eigen::MatrixXd G = rpcfObjs[rpcfids[i]].getG();
-            Qe.block(rpcfids[i] * 7, 0, Fe[i].rows(), Fe[i].cols()) = Fe[i];
-            Qe.block(rpcfids[i] * 7 + 3, 0, 4, 1) = 2 * G.transpose() * np[i];
+            if (rpcfids[bi] == 0) {
+                continue;
+            }
+            Eigen::MatrixXd G = rpcfObjs[rpcfids[bi] - 1].getG();
+            Qe.block(rpcfids[bi] * 7 - 7, 0, Fe[bi].rows(), Fe[bi].cols()) = Fe[bi];
+            Qe.block(rpcfids[bi] * 7 - 7 + 3, 0, 4, 1) = 2 * G.transpose() * np[bi];
         }
     }
     this->Qe = Qe;
@@ -278,9 +282,7 @@ void MTBDsys::update()
     this->ForceCal();
     this->PhiCal();
     this->PhiqCal();
-    std::cout << "2" << std::endl;
     this->gammaCal();
-    std::cout << "1" << std::endl;
     this->QeCal();
     this->QvCal();
 }
